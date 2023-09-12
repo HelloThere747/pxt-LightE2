@@ -251,7 +251,7 @@ namespace lightsource {
             this.prepareOffset()
         }
 
-        apply(lightMap:Image) {
+                apply(lightMap: Image) {
             const camera = game.currentScene().camera;
             const halfh = this.width;
             const cx = this.sprite.x - camera.drawOffsetX;
@@ -265,26 +265,33 @@ namespace lightsource {
             for (let y = 0; y < halfh; y++) {
                 band = this.rings;
                 prev = 0;
-                offset = this.offsetTable[y * this.rings + band - 1]
+
+                // Inner edge of the current ring
+                const innerEdge = this.offsetTable[y * this.rings];
+
+                // If it's the innermost ring, we won't darken the area outside
+                if (innerEdge === 0) {
+                    band = 1;
+                }
 
                 // Darken each concentric circle by remapping the colors
                 while (band > 0) {
-                    offset = this.offsetTable[y * this.rings + band - 1]
+                    offset = this.offsetTable[y * this.rings + band - 1];
                     if (offset) {
-                        offset += (Math.idiv(Math.randomRange(0, 11), 5))
+                        offset += Math.idiv(Math.randomRange(0, 11), 5);
                     }
 
                     // We reflect the circle-quadrant horizontally and vertically
-                    changeRowLightLevel(lightMap, cx + offset, cy + y + 1, prev - offset,band)
-                    changeRowLightLevel(lightMap, cx - prev, cy + y + 1, prev - offset,band) 
-                    changeRowLightLevel(lightMap, cx + offset, cy - y, prev - offset,band)
-                    changeRowLightLevel(lightMap, cx - prev, cy - y, prev - offset,band)
+                    changeRowLightLevel(lightMap, cx + offset, cy + y + 1, prev - offset, band);
+                    changeRowLightLevel(lightMap, cx - prev, cy + y + 1, prev - offset, band);
+                    changeRowLightLevel(lightMap, cx + offset, cy - y, prev - offset, band);
+                    changeRowLightLevel(lightMap, cx - prev, cy - y, prev - offset, band);
 
                     if (band == 1) {
-                        changeRowLightLevel(lightMap, cx, cy + y + 1, prev,0)
-                        changeRowLightLevel(lightMap, cx-prev, cy + y + 1, prev,0)  
-                        changeRowLightLevel(lightMap, cx, cy - y, prev,0)
-                        changeRowLightLevel(lightMap, cx-prev, cy - y, prev,0)   
+                        changeRowLightLevel(lightMap, cx, cy + y + 1, prev, 0);
+                        changeRowLightLevel(lightMap, cx - prev, cy + y + 1, prev, 0);
+                        changeRowLightLevel(lightMap, cx, cy - y, prev, 0);
+                        changeRowLightLevel(lightMap, cx - prev, cy - y, prev, 0);
                     }
 
                     prev = offset;
@@ -292,6 +299,7 @@ namespace lightsource {
                 }
             }
         }
+
     }
 
 }
